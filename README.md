@@ -157,8 +157,9 @@ pipeline even if they reach Gold in future runs.
 ### Steps
 
 ```
-1. Upload data/transactions_raw.csv, accounts_raw.csv, budget_raw.csv
-   to a Databricks Volume at:
+1. Generate source data locally:
+   python data/generate_messy_data.py
+   Then upload all 3 CSVs to your Databricks Volume at:
    /Volumes/workspace/landing/raw_finance/
 
 2. Run notebooks in order:
