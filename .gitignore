@@ -1,0 +1,24 @@
+# Never commit large data files to version control
+# Use the generate script or re-download from source
+data/*.csv
+data/*.parquet
+data/*.json
+
+# Databricks auto-generated files
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+*.pyc
+__pycache__/
+
+# Environment
+.env
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+secrets/
+*credentials*
