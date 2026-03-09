@@ -1,13 +1,13 @@
 # Databricks notebook source
-# Gold Layer — Dimensional Modelling
+# Gold Layer - Dimensional Modelling
 #
 # Builds a star schema on top of Silver clean data.
 # Design decisions:
-#   - SHA2 surrogate keys: deterministic and idempotent — same input always
+#   - SHA2 surrogate keys: deterministic and idempotent - same input always
 #     produces the same key regardless of when the pipeline runs. This makes
 #     MERGE operations safe and avoids key drift across pipeline runs.
 #   - dim_category encodes business logic (category_group, category_type) that
-#     does not exist in the source system. This is intentional — the warehouse
+#     does not exist in the source system. This is intentional - the warehouse
 #     layer is where business knowledge gets formalised.
 #   - Foreign key validation runs before every write. A loud failure is always
 #     preferable to silently writing a fact table with unresolvable joins.
@@ -23,7 +23,7 @@ GOLD_DB   = f"{CATALOG}.gold"
 spark.sql(f"CREATE DATABASE IF NOT EXISTS {GOLD_DB}")
 
 
-# Redefine date UDF — each notebook is self-contained.
+# Redefine date UDF - each notebook is self-contained.
 def parse_mixed_date(date_str):
     if date_str is None or str(date_str).strip() == "":
         return (None, False)
@@ -56,7 +56,7 @@ parse_date_udf = F.udf(parse_mixed_date, date_schema)
 
 
 # dim_date
-# Generated from a date spine — no dependency on transaction data.
+# Generated from a date spine - no dependency on transaction data.
 # Covers 2023-2026 to accommodate edge cases without breaking the pipeline
 # if dates slightly outside the expected 2023-2024 range appear in future loads.
 
@@ -98,7 +98,7 @@ print(f"{GOLD_DB}.dim_date: {dim_date.count()} rows")
 
 
 # dim_accounts
-# Sourced from Bronze — Silver only cleaned transactions, not accounts.
+# Sourced from Bronze - Silver only cleaned transactions, not accounts.
 # account_id is validated before key generation. A NULL surrogate key
 # would silently break every fact-to-dimension join downstream.
 
@@ -106,7 +106,7 @@ accounts_raw = spark.table(f"{CATALOG}.bronze.accounts")
 
 null_ids = accounts_raw.filter(F.col("account_id").isNull()).count()
 if null_ids > 0:
-    raise ValueError(f"{null_ids} NULL account_ids in source — cannot generate surrogate keys")
+    raise ValueError(f"{null_ids} NULL account_ids in source - cannot generate surrogate keys")
 
 dim_accounts = (
     accounts_raw
@@ -135,7 +135,7 @@ print(f"{GOLD_DB}.dim_accounts: {dim_accounts.count()} rows")
 
 
 # dim_category
-# Business logic encoded here — category_group and category_type do not exist
+# Business logic encoded here - category_group and category_type do not exist
 # in the source system. This is a deliberate modelling decision: the warehouse
 # layer is where raw operational categories get mapped to analytical groupings.
 # Any changes to this mapping are version-controlled here, not buried in SQL.
@@ -171,7 +171,7 @@ print(f"{GOLD_DB}.dim_category: {dim_category.count()} rows")
 
 # fct_transactions
 # Natural keys replaced with SHA2 surrogate keys for consistency and idempotency.
-# Foreign key validation runs before write — unresolved joins produce silent
+# Foreign key validation runs before write - unresolved joins produce silent
 # NULL values in dashboards which are harder to detect than a pipeline failure.
 
 silver_txn = spark.table(f"{SILVER_DB}.transactions")
@@ -212,7 +212,7 @@ print(f"Orphaned category_keys : {orphaned_categories:,}")
 
 if orphaned_accounts + orphaned_dates + orphaned_categories > 0:
     raise ValueError(
-        "Foreign key violations detected — fact table references dimension rows that do not exist. "
+        "Foreign key violations detected - fact table references dimension rows that do not exist. "
         "Joins will produce silent NULLs in dashboards. Aborting write."
     )
 

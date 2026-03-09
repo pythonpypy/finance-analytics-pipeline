@@ -1,5 +1,5 @@
 # Databricks notebook source
-# Silver Layer — Cleaning, Standardisation, Validation
+# Silver Layer - Cleaning, Standardisation, Validation
 #
 # Applies all data quality transformations to Bronze transactions.
 # Design decisions:
@@ -8,7 +8,7 @@
 #   - Correct only what is unambiguous: typos like "compleeted" go to quarantine,
 #     not silently mapped, because intent cannot be confirmed without source team input.
 #   - Fixed date range validation (2023-2024) rather than current_date() to ensure
-#     idempotency — pipeline behaviour must not change based on when it runs.
+#     idempotency - pipeline behaviour must not change based on when it runs.
 
 from pyspark.sql import functions as F
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType
@@ -64,7 +64,7 @@ parse_date_udf = F.udf(parse_mixed_date, date_schema)
 
 # Status mapping: lowercase first to collapse casing variants, then map.
 # Values not present in the map return NULL and are quarantined.
-# "compleeted" and "yes" are intentionally not mapped — ambiguous intent
+# "compleeted" and "yes" are intentionally not mapped - ambiguous intent
 # in a financial status field requires source team confirmation.
 
 status_mapping = {
