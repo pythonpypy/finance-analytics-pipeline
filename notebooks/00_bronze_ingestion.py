@@ -1,9 +1,9 @@
 # Databricks notebook source
-# Bronze Layer — Raw Ingestion
+# Bronze Layer - Raw Ingestion
 #
 # Loads raw CSVs from Volumes into Delta tables with no transformations.
 # Adds provenance columns so every downstream row can be traced to its source.
-# Bronze is never modified after ingestion — it is the permanent audit trail.
+# Bronze is never modified after ingestion - it is the permanent audit trail.
 
 from pyspark.sql import functions as F
 

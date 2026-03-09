@@ -11,12 +11,12 @@ realistically messy finance dataset of 1 million transactions.
 ## Architecture
 
 ```
-Raw CSVs (1,040,000 rows — 9 injected DQ issue types)
+Raw CSVs (1,040,000 rows - 9 injected DQ issue types)
         │
         ▼
 ┌───────────────────────────────────────────────────┐
 │  BRONZE  (workspace.bronze)                       │
-│  Raw Delta tables — untouched, permanent audit    │
+│  Raw Delta tables - untouched, permanent audit    │
 │  + _ingested_at  + _source_file                   │
 └───────────────────┬───────────────────────────────┘
                     │
@@ -31,7 +31,7 @@ Raw CSVs (1,040,000 rows — 9 injected DQ issue types)
                     ▼
 ┌───────────────────────────────────────────────────┐
 │  GOLD  (workspace.gold)                           │
-│  Star schema — optimised for analytics            │
+│  Star schema - optimised for analytics            │
 │  fct_transactions  (919,225)                      │
 │  dim_accounts      (50)                           │
 │  dim_date          (1,461)                        │
@@ -76,7 +76,7 @@ dim_accounts ──── fct_transactions ──── dim_category
 (account_key PK)  (transaction_key PK)  (category_key PK)
 ```
 
-Surrogate keys generated via SHA2-256 on natural keys — deterministic and
+Surrogate keys generated via SHA2-256 on natural keys - deterministic and
 idempotent. The same input always produces the same key, making pipeline
 reruns safe without key drift or broken joins.
 
@@ -89,25 +89,25 @@ category groupings (Essential / Discretionary / Income) and flow direction
 ## Key Design Decisions
 
 **Quarantine over delete**
-Dropped rows are invisible — bad data disappears and nobody knows why numbers
+Dropped rows are invisible - bad data disappears and nobody knows why numbers
 don't add up. A quarantine table with `_rejection_reason` makes data quality
 problems visible, measurable, and fixable at the source.
 
 **Fixed date range validation instead of `current_date()`**
 An early bug used `current_date()` to reject future dates. Because the pipeline
 ran in February 2026, dates from 2025 were already in the past and passed
-validation — letting 13,973 invalid rows through to Silver clean. Fixed by
+validation - letting 13,973 invalid rows through to Silver clean. Fixed by
 validating against the known dataset range (2023-01-01 to 2024-12-31).
 This surfaced a critical principle: pipeline behaviour must not change based
 on when it runs. Idempotency requires absolute conditions, not relative ones.
 
 **SHA2 surrogate keys over auto-increment**
-Auto-increment keys require state — the database must remember the last value.
+Auto-increment keys require state - the database must remember the last value.
 SHA2 of the natural key is stateless, deterministic, and consistent across
 pipeline reruns. Running the pipeline twice produces identical keys.
 
 **Business key deduplication over ID deduplication**
-Source transaction IDs were all unique — naive `dropDuplicates("transaction_id")`
+Source transaction IDs were all unique - naive `dropDuplicates("transaction_id")`
 would have missed every duplicate. Real duplicates in transactional systems
 are hidden in the business meaning: same account, same date, same amount, same
 category. Window function dedup on the business key caught 14,000 rows that
@@ -116,7 +116,7 @@ ID-based dedup would have silently let through.
 **Each notebook is self-contained**
 UDFs and shared logic are redefined in each notebook rather than imported.
 This avoids hidden dependencies between notebooks and makes each one runnable
-independently — important for debugging, partial reruns, and onboarding.
+independently - important for debugging, partial reruns, and onboarding.
 
 ---
 
@@ -196,20 +196,20 @@ gold_fact            919,225
 ## What Can Be Built on This
 
 **Immediate extensions:**
-- `mart_budget_vs_actual` — compare actual spend against budget targets already
+- `mart_budget_vs_actual` - compare actual spend against budget targets already
   loaded in `workspace.bronze.budget`. The data is there, the model just needs
   a mart that joins them.
 - Databricks Workflow job to schedule the pipeline on a trigger or cron.
 
 **Medium term:**
 - Replace CSV uploads with Databricks Auto Loader for incremental file ingestion
-  — monitors the Volume and processes new files as they arrive.
+  - monitors the Volume and processes new files as they arrive.
 - SCD Type 2 on `dim_accounts` to track account type changes over time rather
   than overwriting history.
 
 **Longer term:**
 - Great Expectations or Databricks data quality rules for contract-based
-  assertions — move from ad hoc validation to a formal DQ framework.
+  assertions - move from ad hoc validation to a formal DQ framework.
 - dbt semantic layer on top of Gold for reusable, governed metric definitions
   shared across teams.
 - Unity Catalog row and column-level access controls so different teams only
@@ -246,5 +246,5 @@ finance-analytics-pipeline/
 ## Author
 
 Built as a portfolio project demonstrating production-grade data engineering
-patterns — Medallion Architecture, data quality enforcement, dimensional
+patterns - Medallion Architecture, data quality enforcement, dimensional
 modelling, and self-serve analytics on Databricks.
