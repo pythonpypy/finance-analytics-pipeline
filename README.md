@@ -57,11 +57,11 @@ real-world ingestion scenarios. Silver resolves all of them:
 | Business key duplicates | ~14,000 | ROW_NUMBER() dedup on natural business key |
 | Negative amounts | ~25,000 | ABS() correction + `_amount_corrected` audit flag |
 | Out of range dates | ~14,000 | Fixed range validation (2023–2024) |
-| Invalid status codes | ~20,000 | Mapping table — fixable corrected, ambiguous quarantined |
+| Invalid status codes | ~20,000 | Mapping table - fixable corrected, ambiguous quarantined |
 | Orphaned account IDs | ~10,000 | Left anti join validation → quarantine |
 | Whitespace in text fields | ~50,000 | TRIM() on all string columns |
 
-**Quarantine rate: 11.6%** — all rejected rows preserved with `_rejection_reason`
+**Quarantine rate: 11.6%** - all rejected rows preserved with `_rejection_reason`
 for upstream diagnosis rather than silent deletion.
 
 ---
